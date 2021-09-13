@@ -6,6 +6,4 @@ app_name = 'user'
 
 urlpatterns = [
     path('', user_view, name="user"),
-    # path('<int:pk>/', user_view, name="user")
-
 ]
