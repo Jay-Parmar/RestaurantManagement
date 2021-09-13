@@ -20,6 +20,5 @@ from django.urls.conf import include
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    #REST FRAMEWORK URLS
-    path('user/', include('user.urls', 'user_api')),
+    path('user/', include('user.urls')),
 ]
