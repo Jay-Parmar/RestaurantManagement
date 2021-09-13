@@ -19,8 +19,16 @@ def user_view(request):
         return JsonResponse(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'PUT':
+        try:
+            pk = request.GET['pk']
+        except Exception as err:
+            return JsonResponse(str(err), status=status.HTTP_404_NOT_FOUND)
+        try:
+            user = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return HttpResponse(status=status.HTTP_404_NOT_FOUND)
         user_data = JSONParser().parse(request)
-        user_serializer = UserSerializer(data=user_data)
+        user_serializer = UserSerializer(user, data=user_data)
         if user_serializer.is_valid():
             user_serializer.save()
             return JsonResponse(user_serializer.data, status=status.HTTP_200_OK)
@@ -31,7 +39,10 @@ def user_view(request):
             pk = request.GET['pk']
         except Exception as err:
             return JsonResponse(str(err), status=status.HTTP_404_NOT_FOUND)
-        user = User.objects.get(pk=pk)
+        try:
+            user = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return HttpResponse(status=status.HTTP_404_NOT_FOUND)
         data = UserSerializer(user).data
         return JsonResponse(data, status=status.HTTP_200_OK)
 
@@ -41,7 +52,10 @@ def user_view(request):
             pk = request.GET['pk']
         except Exception as err:
             return JsonResponse(str(err), status=status.HTTP_404_NOT_FOUND)
-        user = User.objects.get(pk=pk)
+        try:
+            user = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return HttpResponse(status=status.HTTP_404_NOT_FOUND)
         user.delete() 
         return JsonResponse({'message': 'User was deleted successfully!'}, status=status.HTTP_204_NO_CONTENT)
 
