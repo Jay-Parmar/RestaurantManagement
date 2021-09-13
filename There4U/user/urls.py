@@ -1,9 +1,11 @@
 from django.urls import path
 from django.urls.resolvers import URLPattern
-from .views import user_view
+from rest_framework import views
+from user import views
 
 app_name = 'user'
 
 urlpatterns = [
-    path('', user_view, name="user"),
+    path('', views.UserList.as_view()),
+    path('<int:pk>/', views.UserDetail.as_view()),
 ]
