@@ -19,7 +19,8 @@ class User(models.Model):
         help_text="Enter Your Full Name"
         )
     email = models.EmailField(
-        help_text="Enter Email ID"
+        help_text="Enter Email ID",
+        unique=True
         )
     city = models.CharField(max_length=30, 
         help_text="Enter your current city"
