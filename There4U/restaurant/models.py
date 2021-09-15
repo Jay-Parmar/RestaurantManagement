@@ -11,6 +11,9 @@ class Restaurant(models.Model):
     city = models.CharField(max_length=30, help_text="Restaurant city")
     owners = ManyToManyField(User, related_name='restaurants')
 
+    def __str__(self):
+        return self.name
+
 class MenuItem(models.Model):
     '''
     Model to List unique menu items for all restaurants
@@ -21,3 +24,6 @@ class MenuItem(models.Model):
         help_text="Menu Item Price")
     description = models.CharField(max_length=200, blank=True, help_text="Menu Item Description")
     quantity_available = models.PositiveIntegerField(help_text="Menu Item Quantity Available")
+
+    def __str__(self):
+        return self.name

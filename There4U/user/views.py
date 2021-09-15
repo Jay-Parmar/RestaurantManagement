@@ -1,5 +1,5 @@
 from user.models import User
-from user.serializers import UserSerializer, UserSerializerWithoutID
+from user.serializers import UserSerializer, UserDetailSerializer
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 
@@ -18,7 +18,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         '''Overriding class to return User without an id.'''
         if self.action in ["retrieve"]:
-            return UserSerializerWithoutID
+            return UserDetailSerializer
         return super().get_serializer_class()
 
     def create(self, request, *args, **kwargs):

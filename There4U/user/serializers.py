@@ -11,7 +11,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'email', 'city', 'state', 'zip_code', 'balance']
         
     
-class UserSerializerWithoutID(serializers.ModelSerializer):
+class UserDetailSerializer(serializers.ModelSerializer):
     '''
     User serializer for basic CRUD operations without ID
     '''
