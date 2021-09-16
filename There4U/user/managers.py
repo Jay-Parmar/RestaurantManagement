@@ -4,7 +4,7 @@ class UserManager(BaseUserManager):
     """
     Manager class for custom user model.
     """
-    def create_user(self, email, password, **extra_fields):
+    def create(self, email, password, **extra_fields):
         '''Create a user.'''
         if not email:
             raise ValueError('User should enter an email address')
@@ -12,12 +12,12 @@ class UserManager(BaseUserManager):
         user = self.model(email=self.normalize_email(email), **extra_fields)
 
         user.set_password(password)
-        user.save(using=self._db)
+        user.save()
         return user
 
     def create_superuser(self, email, password, **extra_fields):
         '''Create a superuser.'''
-        return self.create_user(
+        return self.create(
             email=self.normalize_email(email),
             password=password,
             **extra_fields,

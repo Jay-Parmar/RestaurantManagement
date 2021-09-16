@@ -1,18 +1,22 @@
+from rest_framework.views import APIView
 from user.models import User
 from user.serializers import UserSerializer, UserDetailSerializer
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
+
 
 class IsAuthenticatedOrCreate(IsAuthenticated):
+    '''Overriding has_permission '''
     def has_permission(self, request, view):
         if request.method == 'POST':
             return True
         return super().has_permission(request, view)
 
 def check_current_user(request, *args, **kwargs):
+    '''Checks if the user is same as authorised user.'''
     print(kwargs)
     user_id = kwargs['pk']
     try:
@@ -21,7 +25,41 @@ def check_current_user(request, *args, **kwargs):
         return Response(status=status.HTTP_404_NOT_FOUND)
     print("CHECK: ", request.user, user, request.user==user)
     return request.user==user
-    
+
+
+class UserLoginView(APIView):
+    '''
+    View for user when logging in.
+    '''
+    permission_classes = (AllowAny,)
+    def post(self, request, *args, **kwargs):
+        print("username ::: ", request.user)
+        try:
+            user = User.objects.get(email=request.data["email"])
+            password = request.data["password"]
+            print("User ::: ", user, password)
+            if user.check_password(password):
+                user_data = UserSerializer(user).data
+                token = Token.objects.create(user=user).key
+                return Response({**user_data, 'token': token}, status=status.HTTP_200_OK)
+            else:
+                return Response({"password": "Does not match"}, status=status.HTTP_400_BAD_REQUEST)
+        except User.DoesNotExist:
+                return Response({"user": "Does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
+
+class UserLogoutView(APIView):
+    """
+    View for user when logging out.
+    """
+    permission_classes = (IsAuthenticated,)
+    def get(self, request, format=None):
+        try:
+            request.user.auth_token.delete()
+        except Exception:
+            pass
+        return Response({"success": ("Successfully logged out.")}, status=status.HTTP_200_OK)
+
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -31,9 +69,6 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     permission_classes = (IsAuthenticatedOrCreate,)
     authentication_classes = (TokenAuthentication,)
-
-    # def list(self, request, pk=None):
-    #     return Response({"error": "Request Not Allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def return_http_200(self, response):
         '''Returns response with status code as 200.'''
