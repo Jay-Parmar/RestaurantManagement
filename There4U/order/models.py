@@ -25,7 +25,7 @@ class Order(models.Model):
                               help_text="Current Status of Order")
 
     def __str__(self):
-        return self.name
+        return self.user.name
 
 
 class OrderItem(models.Model):
@@ -39,4 +39,4 @@ class OrderItem(models.Model):
     quantity = models.PositiveIntegerField(help_text="Quantity of given item ordered")
 
     def __str__(self):
-        return self.name
+        return self.order.user

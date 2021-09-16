@@ -2,6 +2,7 @@ from user.models import User
 from user.serializers import UserSerializer, UserDetailSerializer
 from rest_framework import viewsets, status
 from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -22,9 +23,12 @@ class UserViewSet(viewsets.ModelViewSet):
         return super().get_serializer_class()
 
     def create(self, request, *args, **kwargs):
-        '''Creating a new User.'''
-        response = super().create(request, *args, **kwargs)
-        return self.return_http_200(response)
+        '''Create a new User.'''
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        token = Token.objects.create(user=user)
+        return Response({**serializer.data, "token": token.key}, status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
         '''Updating exing User.'''
