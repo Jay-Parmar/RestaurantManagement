@@ -47,6 +47,9 @@ INSTALLED_APPS = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
     ]
 }
 
@@ -89,7 +92,7 @@ WSGI_APPLICATION = 'There4U.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'db_for_there4u',
+        'NAME': 'there4u',
         'USER': 'user_for_there4u',
         'PASSWORD': 'user_for_there4u',
         'HOST': 'localhost',
