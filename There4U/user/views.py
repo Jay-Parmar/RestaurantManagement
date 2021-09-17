@@ -1,29 +1,30 @@
+from rest_framework import viewsets, status
 from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.authtoken.models import Token
 from user.models import User
 from user.serializers import UserSerializer, UserDetailSerializer
-from rest_framework import viewsets, status
-from rest_framework.response import Response
-from rest_framework.authtoken.models import Token
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
 class IsAuthenticatedOrCreate(IsAuthenticated):
     '''Overriding has_permission '''
+
     def has_permission(self, request, view):
+        '''Removes authhentication from POST request.'''
         if request.method == 'POST':
             return True
         return super().has_permission(request, view)
 
+
 def check_current_user(request, *args, **kwargs):
     '''Checks if the user is same as authorised user.'''
-    print(kwargs)
     user_id = kwargs['pk']
     try:
         user = User.objects.get(id=user_id)
     except:
         return Response(status=status.HTTP_404_NOT_FOUND)
-    print("CHECK: ", request.user, user, request.user==user)
     return request.user==user
 
 
@@ -32,15 +33,18 @@ class UserLoginView(APIView):
     View for user when logging in.
     '''
     permission_classes = (AllowAny,)
+
     def post(self, request, *args, **kwargs):
-        print("username ::: ", request.user)
+        '''Handles login POST request when given an email and password.'''
         try:
             user = User.objects.get(email=request.data["email"])
             password = request.data["password"]
-            print("User ::: ", user, password)
             if user.check_password(password):
                 user_data = UserSerializer(user).data
-                token = Token.objects.create(user=user).key
+                try:
+                    token = Token.objects.get(user=user).key
+                except Exception as err:
+                    token = Token.objects.create(user=user).key
                 return Response({**user_data, 'token': token}, status=status.HTTP_200_OK)
             else:
                 return Response({"password": "Does not match"}, status=status.HTTP_400_BAD_REQUEST)
@@ -53,7 +57,9 @@ class UserLogoutView(APIView):
     View for user when logging out.
     """
     permission_classes = (IsAuthenticated,)
+    
     def get(self, request, format=None):
+        '''Removes token from user when they log out.'''
         try:
             request.user.auth_token.delete()
         except Exception:
@@ -90,6 +96,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response({**serializer.data, "token": token.key}, status=status.HTTP_200_OK)
 
     def retrieve(self, request, *args, **kwargs):
+        '''Returns a particular user details if he is authenticated.'''
         should_allow = check_current_user(request, *args, **kwargs)
         if not should_allow:
             return Response({"error": "Request Not Allowed"}, status=status.HTTP_401_UNAUTHORIZED)
